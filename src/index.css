@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Futura Font Import */
+@font-face {
+  font-family: 'Futura';
+  src: local('Futura'), local('Futura PT'), local('Futura Std');
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans antialiased bg-white text-yamaha-dark;
+    @apply overflow-x-hidden;
+    font-family: 'Futura', 'Futura PT', 'Futura Std', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Mobile viewport height fix */
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+@layer utilities {
+  /* Safe area for notch/home indicator */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom gradient */
+  .gradient-yamaha, .bg-gradient-yamaha {
+    background: linear-gradient(135deg, #075EAF 0%, #0a4d8f 100%);
+  }
+
+  /* Clip corner effect for sharp geometric design - Buttons & CTAs */
+  .clip-corner {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 12px) 0,
+      100% 12px,
+      100% 100%,
+      12px 100%,
+      0 calc(100% - 12px)
+    );
+    position: relative;
+  }
+
+  .clip-corner:hover {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 16px) 0,
+      100% 16px,
+      100% 100%,
+      16px 100%,
+      0 calc(100% - 16px)
+    );
+  }
+
+  /* Shape Guidelines:
+   * - Buttons/CTAs: Use .clip-corner for geometric sharp edges
+   * - Cards/Containers: Use border-l-4 for left accent (no rounded)
+   * - Badges/Pills: Use rounded-full for circular badges
+   * - Icons backgrounds: Use sharp edges (no rounded) or clip-corner
+   * - Avatars: Can use rounded-full for profile pictures
+   */
+}
+
+/* Swiper custom styles */
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-pagination-bullet {
+  @apply bg-white opacity-50 w-2 h-2;
+  transition: all 0.3s ease;
+  border-radius: 0;
+}
+
+.swiper-pagination-bullet-active {
+  @apply opacity-100 bg-yamaha-blue;
+  width: 28px;
+  height: 3px;
+  border-radius: 0;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-yamaha-blue rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-yamaha-dark;
+}
+
+/* Hide scrollbar for modals */
+.modal-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.modal-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove focus outline and borders */
+.modal-container * {
+  outline: none !important;
+  border: none !important;
+}
+
+.modal-container *:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix Swiper spacing issues */
+.swiper {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.swiper-slide {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.swiper-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure no gaps between slides */
+.swiper-slide img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Fix any potential gaps in slide containers */
+.swiper-slide > div {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure absolute positioning doesn't create gaps */
+.swiper-slide .absolute {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Apply Futura font to all elements */
+* {
+  font-family: 'Futura', 'Futura PT', 'Futura Std', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ensure headings use Futura */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Futura', 'Futura PT', 'Futura Std', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ensure buttons and interactive elements use Futura */
+button, input, textarea, select {
+  font-family: 'Futura', 'Futura PT', 'Futura Std', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

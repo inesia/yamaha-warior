@@ -26,6 +26,7 @@ import Notifications from './pages/notifications/Notifications'
 import Settings from './pages/settings/Settings'
 import Rewards from './pages/rewards/Rewards'
 import Gallery from './pages/gallery/Gallery'
+import LiveChat from './pages/chat/LiveChat'
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -121,6 +122,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/chat" element={<LiveChat />} />
       </Route>
 
       {/* Admin Routes */}

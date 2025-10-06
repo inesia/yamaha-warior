@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Trophy, Award, User } from 'lucide-react'
+import { Home, Trophy, Award, User, MessageCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const BottomNav = () => {
@@ -7,6 +7,7 @@ const BottomNav = () => {
     { path: '/dashboard', icon: Home, label: 'Beranda' },
     { path: '/challenges', icon: Trophy, label: 'Challenge' },
     { path: '/leaderboard', icon: Award, label: 'Peringkat' },
+    { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
 

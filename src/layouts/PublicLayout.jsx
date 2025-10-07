@@ -41,7 +41,7 @@ const PublicLayout = () => {
       </div>
 
       {/* Main Content */}
-      <main className="w-full max-w-[425px] mx-auto min-h-screen relative z-10 md:shadow-2xl md:bg-white/95 md:backdrop-blur-sm md:border md:border-white/20">
+      <main className="w-full max-w-[425px] mx-auto min-h-screen relative z-10 md:shadow-2xl md:bg-white/95 md:backdrop-blur-sm">
         <Outlet />
       </main>
 

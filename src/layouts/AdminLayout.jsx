@@ -11,7 +11,12 @@ import {
   X,
   LogOut,
   User,
-  Shield
+  Shield,
+  Image,
+  Bell,
+  Settings,
+  UserPlus,
+  Gift
 } from 'lucide-react'
 import useAdminStore from '../store/adminStore'
 
@@ -29,6 +34,10 @@ const AdminLayout = () => {
     { path: '/admin/leaderboard-challenge', label: 'Leaderboard Challenge', icon: BarChart3, roles: ['all'] },
     { path: '/admin/winner-periode', label: 'Winner Periode', icon: Award, roles: ['all'] },
     { path: '/admin/reports-analytics', label: 'Reports & Analytics', icon: BarChart3, roles: ['super_admin', 'content_manager'] },
+    { path: '/admin/announcement-management', label: 'Announcement Management', icon: Bell, roles: ['super_admin', 'content_manager'] },
+    { path: '/admin/landing-content-management', label: 'Landing Content', icon: Settings, roles: ['super_admin', 'content_manager'] },
+    { path: '/admin/referral-management', label: 'Referral Management', icon: UserPlus, roles: ['all'] },
+    { path: '/admin/redeem-management', label: 'Hadiah & Redeem', icon: Gift, roles: ['all'] },
     { path: '/admin/admin-management', label: 'Admin Management', icon: Shield, roles: ['super_admin'] }
   ]
 
@@ -55,7 +64,7 @@ const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen flex flex-col ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Header */}
@@ -138,9 +147,9 @@ const AdminLayout = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Top bar */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-6">
             <button
               onClick={() => setSidebarOpen(true)}

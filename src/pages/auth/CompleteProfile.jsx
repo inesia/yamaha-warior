@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
-import { User, Mail, Bike, Phone, ArrowRight } from 'lucide-react'
+import { User, Mail, Bike, Phone, ArrowRight, Check, X } from 'lucide-react'
 
 const CompleteProfile = () => {
   const navigate = useNavigate()
@@ -12,7 +12,7 @@ const CompleteProfile = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: '',
-    motorcycle: '',
+    motorcycles: [], // Changed to array for multiple selection
     agreeTerms: false,
     agreePrivacy: false,
     agreeMarketing: false
@@ -20,6 +20,14 @@ const CompleteProfile = () => {
   
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [showAlert, setShowAlert] = useState(false)
+
+  // Refs for form fields
+  const nameRef = useRef(null)
+  const phoneRef = useRef(null)
+  const motorcyclesRef = useRef(null)
+  const agreeTermsRef = useRef(null)
+  const agreePrivacyRef = useRef(null)
 
   // Data pilihan motor Yamaha (diringkas dari lini resmi Yamaha Indonesia)
   const yamahaMotorcycles = [
@@ -71,6 +79,74 @@ const CompleteProfile = () => {
     }
   }
 
+  // Handle multiple motorcycle selection
+  const handleMotorcycleChange = (motorcycleValue) => {
+    setFormData(prev => {
+      const currentMotorcycles = prev.motorcycles
+      const isSelected = currentMotorcycles.includes(motorcycleValue)
+      
+      let newMotorcycles
+      if (isSelected) {
+        // Remove motorcycle if already selected
+        newMotorcycles = currentMotorcycles.filter(m => m !== motorcycleValue)
+      } else {
+        // Add motorcycle if not selected
+        newMotorcycles = [...currentMotorcycles, motorcycleValue]
+      }
+      
+      return {
+        ...prev,
+        motorcycles: newMotorcycles
+      }
+    })
+    
+    // Clear error when user makes selection
+    if (errors.motorcycles) {
+      setErrors(prev => ({
+        ...prev,
+        motorcycles: ''
+      }))
+    }
+  }
+
+  // Function to scroll to first error field
+  const scrollToFirstError = (errorFields) => {
+    const fieldOrder = ['name', 'phone', 'motorcycles', 'agreeTerms', 'agreePrivacy']
+    const refs = {
+      name: nameRef,
+      phone: phoneRef,
+      motorcycles: motorcyclesRef,
+      agreeTerms: agreeTermsRef,
+      agreePrivacy: agreePrivacyRef
+    }
+
+    for (const field of fieldOrder) {
+      if (errorFields[field]) {
+        const ref = refs[field]
+        if (ref?.current) {
+          // Scroll to the field with smooth behavior
+          ref.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+          // Focus the field after a short delay
+          setTimeout(() => {
+            if (field === 'motorcycles') {
+              // For motorcycles, focus the first checkbox
+              const firstCheckbox = ref.current.querySelector('input[type="checkbox"]')
+              if (firstCheckbox) {
+                firstCheckbox.focus()
+              }
+            } else {
+              ref.current.focus()
+            }
+          }, 500)
+          break
+        }
+      }
+    }
+  }
+
   const validateForm = () => {
     const newErrors = {}
     
@@ -82,8 +158,8 @@ const CompleteProfile = () => {
       newErrors.phone = 'Nomor telepon harus diisi'
     }
     
-    if (!formData.motorcycle) {
-      newErrors.motorcycle = 'Pilihan motor harus diisi'
+    if (formData.motorcycles.length === 0) {
+      newErrors.motorcycles = 'Pilih minimal satu motor Yamaha'
     }
     
     if (!formData.agreeTerms) {
@@ -95,6 +171,18 @@ const CompleteProfile = () => {
     }
     
     setErrors(newErrors)
+    
+    // If there are errors, show alert and scroll to first error field
+    if (Object.keys(newErrors).length > 0) {
+      setShowAlert(true)
+      scrollToFirstError(newErrors)
+      
+      // Hide alert after 5 seconds
+      setTimeout(() => {
+        setShowAlert(false)
+      }, 5000)
+    }
+    
     return Object.keys(newErrors).length === 0
   }
 
@@ -112,12 +200,24 @@ const CompleteProfile = () => {
       setIsLoading(false)
       
       // Update user data
+      const selectedMotorcycles = formData.motorcycles.map(motorcycleValue => {
+        const motorcycle = yamahaMotorcycles.find(m => m.value === motorcycleValue)
+        return {
+          value: motorcycleValue,
+          label: motorcycle?.label || 'Unknown'
+        }
+      })
+
       const updatedUserData = {
         ...user,
         name: formData.name,
         phone: formData.phone,
-        motorcycle: formData.motorcycle,
-        motorcycleName: yamahaMotorcycles.find(m => m.value === formData.motorcycle)?.label || '',
+        motorcycles: selectedMotorcycles, // Array of motorcycle objects
+        primaryMotorcycle: selectedMotorcycles[0]?.value || '', // First motorcycle as primary
+        primaryMotorcycleName: selectedMotorcycles[0]?.label || 'Unknown',
+        // Keep backward compatibility
+        motorcycle: selectedMotorcycles[0]?.value || '',
+        motorcycleName: selectedMotorcycles[0]?.label || '',
         agreeTerms: formData.agreeTerms,
         agreePrivacy: formData.agreePrivacy,
         agreeMarketing: formData.agreeMarketing,
@@ -160,9 +260,39 @@ const CompleteProfile = () => {
               Informasi ini akan membantu kami memberikan pengalaman yang lebih personal
             </p>
 
+            {/* Alert for validation errors */}
+            {showAlert && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-red-800">Data Belum Lengkap</h4>
+                    <p className="text-sm text-red-600 mt-1">
+                      Silakan lengkapi semua field yang wajib diisi. Halaman akan otomatis scroll ke field yang perlu dilengkapi.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAlert(false)}
+                    className="ml-auto text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Nama Lengkap */}
-              <div>
+              <div ref={nameRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nama Lengkap <span className="text-red-500">*</span>
                 </label>
@@ -183,7 +313,7 @@ const CompleteProfile = () => {
               </div>
 
               {/* Phone */}
-              <div>
+              <div ref={phoneRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nomor Telepon <span className="text-red-500">*</span>
                 </label>
@@ -204,33 +334,65 @@ const CompleteProfile = () => {
               </div>
 
               {/* Motorcycle Selection */}
-              <div>
+              <div ref={motorcyclesRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Motor Yamaha Anda <span className="text-red-500">*</span>
+                  Motor Yamaha Anda <span className="text-red-500">*</span> <span className="text-gray-500">(Pilih satu atau lebih)</span>
                 </label>
-                <div className="relative">
-                  <Bike className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <select
-                    name="motorcycle"
-                    value={formData.motorcycle}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all appearance-none bg-white ${
-                      errors.motorcycle ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                  >
-                    {yamahaMotorcycles.map((motorcycle) => (
-                      <option key={motorcycle.value} value={motorcycle.value}>
-                        {motorcycle.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                
+                {/* Selected Motorcycles Display */}
+                {formData.motorcycles.length > 0 && (
+                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Motor yang dipilih:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.motorcycles.map((motorcycleValue) => {
+                        const motorcycle = yamahaMotorcycles.find(m => m.value === motorcycleValue)
+                        return (
+                          <motion.span
+                            key={motorcycleValue}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                          >
+                            {motorcycle?.label}
+                            <button
+                              type="button"
+                              onClick={() => handleMotorcycleChange(motorcycleValue)}
+                              className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                            >
+                              <X size={12} />
+                            </button>
+                          </motion.span>
+                        )
+                      })}
+                    </div>
                   </div>
+                )}
+
+                {/* Motorcycle Checkbox List */}
+                <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2 ${
+                  errors.motorcycles ? 'border-red-500' : 'border-gray-200'
+                }`}>
+                  {yamahaMotorcycles.filter(m => m.value !== '').map((motorcycle) => (
+                    <motion.label
+                      key={motorcycle.value}
+                      whileHover={{ scale: 1.02 }}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.motorcycles.includes(motorcycle.value)}
+                        onChange={() => handleMotorcycleChange(motorcycle.value)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <Bike className="text-gray-400" size={16} />
+                      <span className="text-sm text-gray-700 flex-1">{motorcycle.label}</span>
+                      {formData.motorcycles.includes(motorcycle.value) && (
+                        <Check className="text-blue-600" size={16} />
+                      )}
+                    </motion.label>
+                  ))}
                 </div>
-                {errors.motorcycle && <p className="text-red-500 text-xs mt-1">{errors.motorcycle}</p>}
+                {errors.motorcycles && <p className="text-red-500 text-xs mt-1">{errors.motorcycles}</p>}
               </div>
 
               {/* Terms & Conditions */}
@@ -238,7 +400,7 @@ const CompleteProfile = () => {
                 <h3 className="text-sm font-semibold text-gray-700">Persetujuan</h3>
                 
                 {/* Terms & Conditions */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" ref={agreeTermsRef}>
                   <input
                     type="checkbox"
                     name="agreeTerms"
@@ -264,7 +426,7 @@ const CompleteProfile = () => {
                 {errors.agreeTerms && <p className="text-red-500 text-xs mt-1 ml-7">{errors.agreeTerms}</p>}
 
                 {/* Privacy Policy */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" ref={agreePrivacyRef}>
                   <input
                     type="checkbox"
                     name="agreePrivacy"

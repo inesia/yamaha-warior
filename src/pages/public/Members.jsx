@@ -19,12 +19,12 @@ const Members = () => {
       id: 1,
       user: {
         name: 'Sarah Putri',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+        avatar: '/images/hero1.jpg',
         location: 'Jakarta',
         verified: true
       },
       post: {
-        image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
+        image: '/images/hero1.jpg',
         caption: 'Morning ride dengan Yamaha Filano! 💕 #PilanoMyStyle #YamahaWarior',
         hashtags: ['#PilanoMyStyle', '#YamahaWarior', '#MorningRide'],
         challenge: 'Pilano My Style Challenge'
@@ -41,12 +41,12 @@ const Members = () => {
       id: 2,
       user: {
         name: 'Ahmad Rizki',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        avatar: '/images/hero2.jpg',
         location: 'Bandung',
         verified: false
       },
       post: {
-        image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=400&fit=crop',
+        image: '/images/hero2.jpg',
         caption: 'NMAX Smart Journey - Perjalanan ke kantor dengan style! 🚀 #NMAXSmartJourney',
         hashtags: ['#NMAXSmartJourney', '#SmartRide', '#Professional'],
         challenge: 'NMAX Smart Journey Challenge'
@@ -63,12 +63,12 @@ const Members = () => {
       id: 3,
       user: {
         name: 'Maya Sari',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        avatar: '/images/hero3.jpg',
         location: 'Surabaya',
         verified: true
       },
       post: {
-        image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
+        image: '/images/hero3.jpg',
         caption: 'Fazzio Fashion Ride - Mix and match outfit dengan Fazzio! ✨ #FazzioFashionRide',
         hashtags: ['#FazzioFashionRide', '#FashionRide', '#Style'],
         challenge: 'Fazzio Fashion Ride Challenge'
@@ -85,12 +85,12 @@ const Members = () => {
       id: 4,
       user: {
         name: 'Budi Santoso',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        avatar: '/images/hero1.jpg',
         location: 'Yogyakarta',
         verified: false
       },
       post: {
-        image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=400&fit=crop',
+        image: '/images/hero1.jpg',
         caption: 'NMAX Your Style - Weekend adventure dengan NMAX! 🏍️ #NMAXYourStyle',
         hashtags: ['#NMAXYourStyle', '#WeekendAdventure', '#Lifestyle'],
         challenge: 'NMAX Your Style Challenge'
@@ -107,12 +107,12 @@ const Members = () => {
       id: 5,
       user: {
         name: 'Dewi Lestari',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+        avatar: '/images/hero2.jpg',
         location: 'Medan',
         verified: true
       },
       post: {
-        image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
+        image: '/images/hero2.jpg',
         caption: 'Pilano My Style - Pastel vibes dengan Filano! 🌸 #PilanoMyStyle',
         hashtags: ['#PilanoMyStyle', '#PastelVibes', '#Feminine'],
         challenge: 'Pilano My Style Challenge'

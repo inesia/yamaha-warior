@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
-import { ArrowLeft, User, Mail, Lock, Eye, EyeOff, CheckCircle, Bike } from 'lucide-react'
+import { ArrowLeft, User, Mail, Lock, Eye, EyeOff, CheckCircle, Bike, Check, X } from 'lucide-react'
 
 const Register = () => {
   const navigate = useNavigate()
@@ -14,7 +14,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     phone: '',
-    motorcycle: '',
+    motorcycles: [], // Changed to array for multiple selection
     agreeTerms: false
   })
   
@@ -73,6 +73,36 @@ const Register = () => {
     }
   }
 
+  // Handle multiple motorcycle selection
+  const handleMotorcycleChange = (motorcycleValue) => {
+    setFormData(prev => {
+      const currentMotorcycles = prev.motorcycles
+      const isSelected = currentMotorcycles.includes(motorcycleValue)
+      
+      let newMotorcycles
+      if (isSelected) {
+        // Remove motorcycle if already selected
+        newMotorcycles = currentMotorcycles.filter(m => m !== motorcycleValue)
+      } else {
+        // Add motorcycle if not selected
+        newMotorcycles = [...currentMotorcycles, motorcycleValue]
+      }
+      
+      return {
+        ...prev,
+        motorcycles: newMotorcycles
+      }
+    })
+    
+    // Clear error when user makes selection
+    if (errors.motorcycles) {
+      setErrors(prev => ({
+        ...prev,
+        motorcycles: ''
+      }))
+    }
+  }
+
   const validateForm = () => {
     const newErrors = {}
     
@@ -100,8 +130,8 @@ const Register = () => {
       newErrors.phone = 'Nomor telepon harus diisi'
     }
     
-    if (!formData.motorcycle) {
-      newErrors.motorcycle = 'Pilihan motor harus diisi'
+    if (formData.motorcycles.length === 0) {
+      newErrors.motorcycles = 'Pilih minimal satu motor Yamaha'
     }
     
     if (!formData.agreeTerms) {
@@ -126,13 +156,22 @@ const Register = () => {
       setIsLoading(false)
       
       // Mock user data untuk demo
+      const selectedMotorcycles = formData.motorcycles.map(motorcycleValue => {
+        const motorcycle = yamahaMotorcycles.find(m => m.value === motorcycleValue)
+        return {
+          value: motorcycleValue,
+          label: motorcycle?.label || 'Unknown'
+        }
+      })
+
       const newUserData = {
         id: 'user-' + Date.now(),
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        motorcycle: formData.motorcycle,
-        motorcycleName: yamahaMotorcycles.find(m => m.value === formData.motorcycle)?.label || 'Unknown',
+        motorcycles: selectedMotorcycles, // Array of motorcycle objects
+        primaryMotorcycle: selectedMotorcycles[0]?.value || '', // First motorcycle as primary
+        primaryMotorcycleName: selectedMotorcycles[0]?.label || 'Unknown',
         picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=0066B3&color=fff&size=200`,
         points: 0,
         rank: 'Rookie',
@@ -261,31 +300,63 @@ const Register = () => {
               {/* Motorcycle Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Motor Yamaha Anda
+                  Motor Yamaha Anda <span className="text-gray-500">(Pilih satu atau lebih)</span>
                 </label>
-                <div className="relative">
-                  <Bike className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <select
-                    name="motorcycle"
-                    value={formData.motorcycle}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all appearance-none bg-white ${
-                      errors.motorcycle ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                  >
-                    {yamahaMotorcycles.map((motorcycle) => (
-                      <option key={motorcycle.value} value={motorcycle.value}>
-                        {motorcycle.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                
+                {/* Selected Motorcycles Display */}
+                {formData.motorcycles.length > 0 && (
+                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Motor yang dipilih:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.motorcycles.map((motorcycleValue) => {
+                        const motorcycle = yamahaMotorcycles.find(m => m.value === motorcycleValue)
+                        return (
+                          <motion.span
+                            key={motorcycleValue}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                          >
+                            {motorcycle?.label}
+                            <button
+                              type="button"
+                              onClick={() => handleMotorcycleChange(motorcycleValue)}
+                              className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                            >
+                              <X size={12} />
+                            </button>
+                          </motion.span>
+                        )
+                      })}
+                    </div>
                   </div>
+                )}
+
+                {/* Motorcycle Checkbox List */}
+                <div className={`max-h-60 overflow-y-auto border rounded-lg p-3 space-y-2 ${
+                  errors.motorcycles ? 'border-red-500' : 'border-gray-200'
+                }`}>
+                  {yamahaMotorcycles.filter(m => m.value !== '').map((motorcycle) => (
+                    <motion.label
+                      key={motorcycle.value}
+                      whileHover={{ scale: 1.02 }}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.motorcycles.includes(motorcycle.value)}
+                        onChange={() => handleMotorcycleChange(motorcycle.value)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <Bike className="text-gray-400" size={16} />
+                      <span className="text-sm text-gray-700 flex-1">{motorcycle.label}</span>
+                      {formData.motorcycles.includes(motorcycle.value) && (
+                        <Check className="text-blue-600" size={16} />
+                      )}
+                    </motion.label>
+                  ))}
                 </div>
-                {errors.motorcycle && <p className="text-red-500 text-xs mt-1">{errors.motorcycle}</p>}
+                {errors.motorcycles && <p className="text-red-500 text-xs mt-1">{errors.motorcycles}</p>}
               </div>
 
               {/* Password */}

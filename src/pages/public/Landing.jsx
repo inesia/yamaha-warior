@@ -26,21 +26,21 @@ const Landing = () => {
       id: 1,
       title: 'Jadilah Warior',
       subtitle: 'Ikuti Challenge Yamaha dan Raih Hadiahnya',
-      image: 'https://www.yamahamotor.co.id/wp-content/uploads/2024/11/Yamaha-Filano-Hybrid-Lux.png',
+      image: '/images/hero1.jpg',
       cta: 'Mulai Challenge',
     },
     {
       id: 2,
       title: 'Bagikan Momenmu',
       subtitle: 'Tunjukkan Kebanggaanmu di Social Media',
-      image: 'https://www.yamahamotor.co.id/wp-content/uploads/2024/12/YAMAHA-AEROX-ALPHA.png',
+      image: '/images/hero2.jpg',
       cta: 'Lihat Challenge',
     },
     {
       id: 3,
       title: 'Menangkan Hadiah',
       subtitle: 'Berkompetisi dan Dapatkan Hadiah Menarik',
-      image: 'https://www.yamahamotor.co.id/wp-content/uploads/2025/05/YAMAHA-GEAR-ULTIMA-HYBRID.png',
+      image: '/images/hero3.jpg',
       cta: 'Join Sekarang',
     },
   ]
@@ -142,19 +142,62 @@ const Landing = () => {
           autoplay={{ delay: 5000, disableOnInteraction: false }}
           loop={true}
           className="h-full"
-          style={{ margin: 0, padding: 0 }}
+          style={{ 
+            margin: 0, 
+            padding: 0,
+            overflow: 'hidden',
+            borderRadius: 0,
+            border: 'none',
+            outline: 'none',
+            boxSizing: 'border-box'
+          }}
         >
           {heroSlides.map((slide) => (
-            <SwiperSlide key={slide.id} style={{ margin: 0, padding: 0 }}>
-              <div className="relative h-full w-full" style={{ margin: 0, padding: 0 }}>
+            <SwiperSlide 
+              key={slide.id} 
+              style={{ 
+                margin: 0, 
+                padding: 0, 
+                overflow: 'hidden',
+                border: 'none',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div 
+                className="relative h-full w-full" 
+                style={{ 
+                  margin: 0, 
+                  padding: 0, 
+                  overflow: 'hidden',
+                  border: 'none',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              >
                 {/* Background Image with overlay */}
-                <div className="absolute inset-0">
+                <div 
+                  className="absolute inset-0" 
+                  style={{ 
+                    overflow: 'hidden',
+                    border: 'none',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                >
                   <img
                     src={slide.image}
                     alt={slide.title}
                     className="w-full h-full object-cover"
+                    style={{ 
+                      display: 'block',
+                      margin: 0,
+                      padding: 0,
+                      border: 'none',
+                      outline: 'none'
+                    }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-yamaha-dark via-yamaha-dark/60 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-blue-900/80 to-transparent"></div>
                 </div>
                 
                 {/* Content */}
@@ -197,7 +240,7 @@ const Landing = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-yamaha-dark text-white py-8">
+      <section className="bg-slate-900 text-white py-8">
         <div className="max-w-lg mx-auto px-6">
           <div className="grid grid-cols-3 gap-4">
             {stats.map((stat, index) => (

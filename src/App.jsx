@@ -47,6 +47,10 @@ import LeaderboardChallenge from './pages/admin/LeaderboardChallenge'
 import WinnerPeriode from './pages/admin/WinnerPeriode'
 import ReportsAnalytics from './pages/admin/ReportsAnalytics'
 import AdminManagement from './pages/admin/AdminManagement'
+import AnnouncementManagement from './pages/admin/AnnouncementManagement'
+import LandingContentManagement from './pages/admin/LandingContentManagement'
+import ReferralManagement from './pages/admin/ReferralManagement'
+import RedeemManagement from './pages/admin/RedeemManagement'
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -181,6 +185,10 @@ function App() {
         <Route path="/admin/leaderboard-challenge" element={<LeaderboardChallenge />} />
         <Route path="/admin/winner-periode" element={<WinnerPeriode />} />
         <Route path="/admin/reports-analytics" element={<ReportsAnalytics />} />
+        <Route path="/admin/announcement-management" element={<AnnouncementManagement />} />
+        <Route path="/admin/landing-content-management" element={<LandingContentManagement />} />
+        <Route path="/admin/referral-management" element={<ReferralManagement />} />
+        <Route path="/admin/redeem-management" element={<RedeemManagement />} />
         <Route path="/admin/admin-management" element={<AdminManagement />} />
       </Route>
 

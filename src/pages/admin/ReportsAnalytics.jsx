@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AlertModal from '../../components/AlertModal'
 import { 
   BarChart3, 
   TrendingUp, 
@@ -24,6 +25,10 @@ const ReportsAnalytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('30d')
   const [selectedMetric, setSelectedMetric] = useState('overview')
   const [isExporting, setIsExporting] = useState(false)
+  
+  // Modal states
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertData, setAlertData] = useState({})
 
   // Mock analytics data
   const analyticsData = {
@@ -71,7 +76,12 @@ const ReportsAnalytics = () => {
     // Simulate export process
     await new Promise(resolve => setTimeout(resolve, 2000))
     setIsExporting(false)
-    alert('Report berhasil diekspor!')
+    setAlertData({
+      title: 'Berhasil!',
+      message: 'Report berhasil diekspor dan akan dikirim ke email Anda.',
+      type: 'success'
+    })
+    setShowAlert(true)
   }
 
   const getMetricColor = (value, type) => {
@@ -347,6 +357,16 @@ const ReportsAnalytics = () => {
           </button>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+        title={alertData.title}
+        message={alertData.message}
+        type={alertData.type}
+        buttonText="OK"
+      />
     </div>
   )
 }

@@ -65,6 +65,10 @@ const AuthenticatedLeaderboard = () => {
     },
   ]
 
+  const currentUserEntry = leaderboardData.find((p) => p.isCurrentUser)
+  const nextEntry = leaderboardData.find((p) => p.rank === (currentUserEntry?.rank || 0) - 1)
+  const pointsToNext = Math.max((nextEntry?.points || 0) - (currentUserEntry?.points || 0), 0)
+
   const getRankIcon = (rank) => {
     switch (rank) {
       case 1:
@@ -113,6 +117,28 @@ const AuthenticatedLeaderboard = () => {
           ))}
         </div>
 
+        {/* Your Rank Card - moved to top for visibility */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white p-6 mb-6 border-2 border-yamaha-blue clip-corner"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm mb-1">Peringkat Kamu Saat Ini</p>
+              <p className="text-3xl font-black text-yamaha-dark">#{currentUserEntry?.rank || '-'}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-600 text-sm mb-1">Poin ke Peringkat Selanjutnya</p>
+              <div className="flex items-center gap-2 justify-end">
+                <TrendingUp size={20} className="text-yamaha-blue" />
+                <p className="text-2xl font-black text-yamaha-blue">{pointsToNext}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Top 3 Podium */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -155,7 +181,7 @@ const AuthenticatedLeaderboard = () => {
               transition={{ delay: 0.2 }}
               className="flex flex-col items-center"
             >
-              <Crown size={32} className="text-yamaha-blue mb-2" />
+              <Crown size={32} className="text-white mb-2" />
               <div className="relative mb-2">
                 <img
                   src={leaderboardData[0].avatar}
@@ -255,29 +281,7 @@ const AuthenticatedLeaderboard = () => {
           ))}
         </div>
 
-        {/* Your Rank Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white p-6 mt-6 border-2 border-yamaha-blue clip-corner"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">Peringkat Kamu Saat Ini</p>
-              <p className="text-3xl font-black text-yamaha-dark">#{leaderboardData[5].rank}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-gray-600 text-sm mb-1">Poin ke Peringkat Selanjutnya</p>
-              <div className="flex items-center gap-2">
-                <TrendingUp size={20} className="text-yamaha-blue" />
-                <p className="text-2xl font-black text-yamaha-blue">
-                  {leaderboardData[4].points - leaderboardData[5].points}
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Your Rank Card moved above */}
       </div>
     </div>
   )

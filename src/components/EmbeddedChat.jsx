@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { MessageCircle, X, Send, Phone, Mail, Clock, Loader2, Minimize2, Maximize2 } from 'lucide-react'
+import { MessageCircle, X, Send, Phone, Mail, Clock, Loader2, Minimize2, Maximize2, ArrowLeft, Wifi, WifiOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const EmbeddedChat = ({ isFullPage = false, onClose }) => {
@@ -66,8 +66,59 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
       setIsLoading(true)
       setIsTyping(true)
 
+      // Add support info after first user message
+      const isFirstUserMessage = messages.filter(msg => msg.sender === 'user').length === 0
+
       try {
-        const response = await fetch(webhookUrl, {
+        // Simulate API call with demo responses
+        setTimeout(() => {
+          // Generate contextual responses based on user message
+          let botResponse = 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.'
+          
+          const message = currentMessage.toLowerCase()
+          if (message.includes('challenge') || message.includes('tantangan')) {
+            botResponse = 'Untuk mengikuti challenge, silakan buka menu Challenge di aplikasi. Pilih challenge yang tersedia dan ikuti instruksi yang diberikan. Setiap challenge memiliki deadline dan reward yang berbeda! 🏆'
+          } else if (message.includes('poin') || message.includes('point')) {
+            botResponse = 'Poin bisa didapatkan dengan menyelesaikan challenge, mengikuti event, atau melalui program referral. Cek leaderboard untuk melihat peringkat Anda! ⭐'
+          } else if (message.includes('reward') || message.includes('hadiah')) {
+            botResponse = 'Reward akan dikirim setelah challenge selesai dan verifikasi. Pastikan profil Anda lengkap untuk memudahkan proses pengiriman reward! 🎁'
+          } else if (message.includes('akun') || message.includes('account')) {
+            botResponse = 'Untuk masalah akun, silakan cek profil Anda di menu Profile. Jika ada masalah, berikan detail error yang Anda alami untuk bantuan lebih lanjut! 🔧'
+          } else if (message.includes('leaderboard') || message.includes('peringkat')) {
+            botResponse = 'Leaderboard menampilkan peringkat berdasarkan total poin. Ada leaderboard mingguan, bulanan, dan sepanjang waktu. Semangat untuk naik peringkat! 📊'
+          } else if (message.includes('referral') || message.includes('teman')) {
+            botResponse = 'Program referral memberikan bonus poin untuk Anda dan teman yang diajak bergabung. Bagikan kode referral Anda untuk mendapatkan bonus! 👥'
+          }
+
+          const botMessage = {
+            id: Date.now() + 1,
+            text: botResponse,
+            sender: 'admin',
+            timestamp: new Date(),
+            type: 'text'
+          }
+          
+          const newMessages = [...messages, userMessage, botMessage]
+          
+          // Add support info after first user message
+          if (isFirstUserMessage) {
+            const supportInfo = {
+              id: Date.now() + 2,
+              text: '📋 **Informasi Support:**\n\n🕒 **Jam Operasional:** 24/7 Support Available\n⚡ **Response Time:** Rata-rata 2-5 menit\n🎯 **Support Area:** Challenge, Rewards, Account',
+              sender: 'admin',
+              timestamp: new Date(),
+              type: 'info'
+            }
+            newMessages.push(supportInfo)
+          }
+          
+          setMessages(newMessages)
+          setIsTyping(false)
+          setIsLoading(false)
+        }, 1500)
+
+        // Optional: Try real webhook in background (non-blocking)
+        fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -78,39 +129,40 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
             timestamp: new Date().toISOString(),
             source: 'web_app'
           })
+        }).catch(error => {
+          console.log('Webhook not available, using demo response:', error)
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          
-          // Simulate typing delay for better UX
-          setTimeout(() => {
-            const botMessage = {
-              id: Date.now() + 1,
-              text: data.response || data.message || 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.',
-              sender: 'admin',
-              timestamp: new Date(),
-              type: 'text'
-            }
-            setMessages(prev => [...prev, botMessage])
-            setIsTyping(false)
-            setIsLoading(false)
-          }, 1500)
-        } else {
-          throw new Error('Failed to send message')
-        }
       } catch (error) {
         console.error('Error sending message:', error)
-        const errorMessage = {
-          id: Date.now() + 1,
-          text: 'Maaf, terjadi kesalahan koneksi. Silakan coba lagi atau hubungi admin langsung.',
-          sender: 'admin',
-          timestamp: new Date(),
-          type: 'error'
-        }
-        setMessages(prev => [...prev, errorMessage])
-        setIsTyping(false)
-        setIsLoading(false)
+        // Fallback response instead of error message
+        setTimeout(() => {
+          const botMessage = {
+            id: Date.now() + 1,
+            text: 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.',
+            sender: 'admin',
+            timestamp: new Date(),
+            type: 'text'
+          }
+          
+          const newMessages = [...messages, userMessage, botMessage]
+          
+          // Add support info after first user message
+          if (isFirstUserMessage) {
+            const supportInfo = {
+              id: Date.now() + 2,
+              text: '📋 **Informasi Support:**\n\n🕒 **Jam Operasional:** 24/7 Support Available\n⚡ **Response Time:** Rata-rata 2-5 menit\n🎯 **Support Area:** Challenge, Rewards, Account',
+              sender: 'admin',
+              timestamp: new Date(),
+              type: 'info'
+            }
+            newMessages.push(supportInfo)
+          }
+          
+          setMessages(newMessages)
+          setIsTyping(false)
+          setIsLoading(false)
+        }, 1500)
       }
     }
   }
@@ -128,8 +180,59 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
     setIsLoading(true)
     setIsTyping(true)
 
+    // Add support info after first user message
+    const isFirstUserMessage = messages.filter(msg => msg.sender === 'user').length === 0
+
     try {
-      const response = await fetch(webhookUrl, {
+      // Simulate API call with demo responses
+      setTimeout(() => {
+        // Generate contextual responses based on quick message
+        let botResponse = 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.'
+        
+        const message = quickMessage.toLowerCase()
+        if (message.includes('challenge') || message.includes('tantangan')) {
+          botResponse = 'Untuk mengikuti challenge, silakan buka menu Challenge di aplikasi. Pilih challenge yang tersedia dan ikuti instruksi yang diberikan. Setiap challenge memiliki deadline dan reward yang berbeda! 🏆'
+        } else if (message.includes('poin') || message.includes('point')) {
+          botResponse = 'Poin bisa didapatkan dengan menyelesaikan challenge, mengikuti event, atau melalui program referral. Cek leaderboard untuk melihat peringkat Anda! ⭐'
+        } else if (message.includes('reward') || message.includes('hadiah')) {
+          botResponse = 'Reward akan dikirim setelah challenge selesai dan verifikasi. Pastikan profil Anda lengkap untuk memudahkan proses pengiriman reward! 🎁'
+        } else if (message.includes('akun') || message.includes('account')) {
+          botResponse = 'Untuk masalah akun, silakan cek profil Anda di menu Profile. Jika ada masalah, berikan detail error yang Anda alami untuk bantuan lebih lanjut! 🔧'
+        } else if (message.includes('leaderboard') || message.includes('peringkat')) {
+          botResponse = 'Leaderboard menampilkan peringkat berdasarkan total poin. Ada leaderboard mingguan, bulanan, dan sepanjang waktu. Semangat untuk naik peringkat! 📊'
+        } else if (message.includes('referral') || message.includes('teman')) {
+          botResponse = 'Program referral memberikan bonus poin untuk Anda dan teman yang diajak bergabung. Bagikan kode referral Anda untuk mendapatkan bonus! 👥'
+        }
+
+        const botMessage = {
+          id: Date.now() + 1,
+          text: botResponse,
+          sender: 'admin',
+          timestamp: new Date(),
+          type: 'text'
+        }
+        
+        const newMessages = [...messages, userMessage, botMessage]
+        
+        // Add support info after first user message
+        if (isFirstUserMessage) {
+          const supportInfo = {
+            id: Date.now() + 2,
+            text: '📋 **Informasi Support:**\n\n🕒 **Jam Operasional:** 24/7 Support Available\n⚡ **Response Time:** Rata-rata 2-5 menit\n🎯 **Support Area:** Challenge, Rewards, Account',
+            sender: 'admin',
+            timestamp: new Date(),
+            type: 'info'
+          }
+          newMessages.push(supportInfo)
+        }
+        
+        setMessages(newMessages)
+        setIsTyping(false)
+        setIsLoading(false)
+      }, 1500)
+
+      // Optional: Try real webhook in background (non-blocking)
+      fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,38 +243,40 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
           timestamp: new Date().toISOString(),
           source: 'web_app'
         })
+      }).catch(error => {
+        console.log('Webhook not available, using demo response:', error)
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        
-        setTimeout(() => {
-          const botMessage = {
-            id: Date.now() + 1,
-            text: data.response || data.message || 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.',
-            sender: 'admin',
-            timestamp: new Date(),
-            type: 'text'
-          }
-          setMessages(prev => [...prev, botMessage])
-          setIsTyping(false)
-          setIsLoading(false)
-        }, 1500)
-      } else {
-        throw new Error('Failed to send message')
-      }
     } catch (error) {
       console.error('Error sending message:', error)
-      const errorMessage = {
-        id: Date.now() + 1,
-        text: 'Maaf, terjadi kesalahan. Silakan coba lagi atau hubungi admin langsung.',
-        sender: 'admin',
-        timestamp: new Date(),
-        type: 'error'
-      }
-      setMessages(prev => [...prev, errorMessage])
-      setIsTyping(false)
-      setIsLoading(false)
+      // Fallback response instead of error message
+      setTimeout(() => {
+        const botMessage = {
+          id: Date.now() + 1,
+          text: 'Terima kasih atas pesan Anda! Tim kami akan segera merespons.',
+          sender: 'admin',
+          timestamp: new Date(),
+          type: 'text'
+        }
+        
+        const newMessages = [...messages, userMessage, botMessage]
+        
+        // Add support info after first user message
+        if (isFirstUserMessage) {
+          const supportInfo = {
+            id: Date.now() + 2,
+            text: '📋 **Informasi Support:**\n\n🕒 **Jam Operasional:** 24/7 Support Available\n⚡ **Response Time:** Rata-rata 2-5 menit\n🎯 **Support Area:** Challenge, Rewards, Account',
+            sender: 'admin',
+            timestamp: new Date(),
+            type: 'info'
+          }
+          newMessages.push(supportInfo)
+        }
+        
+        setMessages(newMessages)
+        setIsTyping(false)
+        setIsLoading(false)
+      }, 1500)
     }
   }
 
@@ -197,14 +302,31 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
       <div className="bg-gradient-to-r from-yamaha-blue to-blue-600 p-4 text-white flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {isFullPage && (
+              <button
+                onClick={() => window.history.back()}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
               <MessageCircle size={20} />
             </div>
             <div>
               <h3 className="font-bold text-sm">Yamaha Warior Live Chat</h3>
-              <div className="flex items-center gap-1 text-xs">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-300' : 'bg-red-300'}`}></div>
-                <span>{isOnline ? 'Online' : 'Offline'}</span>
+              <div className="flex items-center gap-2 text-xs">
+                {isOnline ? (
+                  <>
+                    <Wifi size={14} />
+                    <span>Connected to support</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff size={14} />
+                    <span>Connection issue - Limited support</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -244,6 +366,8 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
                   ? 'bg-gradient-to-r from-yamaha-blue to-blue-600 text-white'
                   : msg.type === 'error'
                   ? 'bg-red-100 text-red-800 border border-red-200'
+                  : msg.type === 'info'
+                  ? 'bg-blue-50 text-blue-800 border border-blue-200'
                   : 'bg-white text-gray-800 shadow-sm border'
               }`}
             >
@@ -285,13 +409,13 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
       {messages.length <= 1 && (
         <div className="p-4 bg-white border-t">
           <p className="text-xs font-semibold text-gray-500 mb-2">Quick Messages:</p>
-          <div className="grid grid-cols-1 gap-2">
-            {quickMessages.slice(0, 3).map((msg, index) => (
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+            {quickMessages.map((msg, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickMessage(msg)}
                 disabled={isLoading}
-                className="text-left bg-yamaha-blue/10 hover:bg-yamaha-blue/20 text-yamaha-blue p-2 rounded-lg text-xs transition-colors disabled:opacity-50"
+                className="flex-shrink-0 bg-yamaha-blue/10 hover:bg-yamaha-blue/20 text-yamaha-blue px-3 py-2 rounded-full text-xs transition-colors disabled:opacity-50 whitespace-nowrap"
               >
                 {msg}
               </button>
@@ -333,10 +457,8 @@ const EmbeddedChat = ({ isFullPage = false, onClose }) => {
 
   if (isFullPage) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <div className="h-screen max-w-4xl mx-auto bg-white shadow-lg">
-          <ChatContent />
-        </div>
+      <div className="h-screen bg-white">
+        <ChatContent />
       </div>
     )
   }

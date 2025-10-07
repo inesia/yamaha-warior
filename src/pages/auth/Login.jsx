@@ -2,42 +2,61 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { Chrome, ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
+import GoogleOneTapSimulation from '../../components/GoogleOneTapSimulation'
+import AlertModal from '../../components/AlertModal'
 
 const Login = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
+  const [showOneTap, setShowOneTap] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertData, setAlertData] = useState({})
 
-  // DUMMY LOGIN - For demo purposes only
+  // Klik tombol Google akan memicu One Tap Simulation
   const handleGoogleLogin = () => {
-    // Mock user data untuk demo
+    setShowOneTap(true)
+  }
+
+  // Callback saat user klik "Sign in" di modal simulasi
+  const handleOneTapSignIn = ({ email }) => {
     const dummyUserData = {
       id: 'demo-user-' + Date.now(),
       name: 'Demo Warior',
-      email: 'demo@yamahawarior.com',
+      email: email || 'demo@yamahawarior.com',
       picture: 'https://ui-avatars.com/api/?name=Demo+Warior&background=0066B3&color=fff&size=200',
       points: 1250,
       rank: 'Silver Warior',
       level: 5,
       completedChallenges: 8,
       joinedDate: new Date().toISOString(),
+      profileCompleted: false, // Set false untuk demo flow baru
     }
-    
+
     const dummyToken = 'demo-token-' + Date.now()
-    
-    // Save to store
+
     login(dummyUserData, dummyToken)
-    
-    // Check if user was trying to join a specific challenge
-    const selectedChallengeId = localStorage.getItem('selectedChallengeId')
-    if (selectedChallengeId) {
-      // Clear the stored challenge ID
-      localStorage.removeItem('selectedChallengeId')
-      // Show success message and redirect to the specific challenge
-      alert('Login berhasil! Kamu akan diarahkan ke challenge yang dipilih.')
-      navigate(`/challenges/${selectedChallengeId}`)
+
+    // Cek apakah user sudah melengkapi profil
+    if (!dummyUserData.profileCompleted) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      navigate('/complete-profile')
     } else {
-      // Redirect to dashboard
-      navigate('/dashboard')
+      const selectedChallengeId = localStorage.getItem('selectedChallengeId')
+      if (selectedChallengeId) {
+        localStorage.removeItem('selectedChallengeId')
+        setAlertData({
+          title: 'Login Berhasil!',
+          message: 'Kamu akan diarahkan ke challenge yang dipilih.',
+          type: 'success'
+        })
+        setShowAlert(true)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        navigate(`/challenges/${selectedChallengeId}`)
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        navigate('/dashboard')
+      }
     }
   }
 
@@ -48,7 +67,10 @@ const Login = () => {
       <div className="safe-top p-4">
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/')}
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            navigate('/')
+          }}
           className="p-2 -ml-2 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors border-l-4 border-white/40"
         >
           <ArrowLeft size={24} />
@@ -96,10 +118,35 @@ const Login = () => {
             <p className="text-xs text-gray-500 text-center mt-6">
               Dengan masuk, kamu setuju dengan Syarat & Ketentuan serta Kebijakan Privasi kami
             </p>
+
+            {/* Info Text */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Dengan masuk menggunakan Google, Anda otomatis terdaftar sebagai member Yamaha Warrior
+              </p>
+            </div>
           </div>
 
         </motion.div>
       </div>
+
+      {/* One Tap Simulation Modal */}
+      {showOneTap && (
+        <GoogleOneTapSimulation
+          onClose={() => setShowOneTap(false)}
+          onSignIn={handleOneTapSignIn}
+        />
+      )}
+
+      {/* Alert Modal */}
+      <AlertModal
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+        title={alertData.title}
+        message={alertData.message}
+        type={alertData.type}
+        buttonText="OK"
+      />
     </div>
   )
 }

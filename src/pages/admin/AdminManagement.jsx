@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ConfirmModal from '../../components/ConfirmModal'
 import { 
   Search, 
   Plus, 
@@ -20,6 +21,10 @@ const AdminManagement = () => {
   const { adminUser } = useAdminStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  
+  // Modal states
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [adminToDelete, setAdminToDelete] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedAdmin, setSelectedAdmin] = useState(null)
   
@@ -132,9 +137,21 @@ const AdminManagement = () => {
   }
 
   const handleDeleteAdmin = (adminId) => {
-    if (window.confirm('Are you sure you want to delete this admin?')) {
-      setAdmins(admins.filter(admin => admin.id !== adminId))
+    setAdminToDelete(adminId)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (adminToDelete) {
+      setAdmins(admins.filter(admin => admin.id !== adminToDelete))
+      setAdminToDelete(null)
     }
+    setShowDeleteConfirm(false)
+  }
+
+  const handleDeleteCancel = () => {
+    setAdminToDelete(null)
+    setShowDeleteConfirm(false)
   }
 
   const openEditModal = (admin) => {
@@ -546,6 +563,18 @@ const AdminManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        show={showDeleteConfirm}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Konfirmasi Hapus Admin"
+        message="Apakah Anda yakin ingin menghapus admin ini? Tindakan ini tidak dapat dibatalkan."
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        type="warning"
+      />
     </div>
   )
 }

@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import Header from '../../components/Header'
+import AlertModal from '../../components/AlertModal'
+import ConfirmModal from '../../components/ConfirmModal'
 import {
   Trophy,
   Award,
@@ -21,11 +24,24 @@ import {
   Gift,
   Camera,
   Heart,
+  Copy,
 } from 'lucide-react'
 
 const Profile = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  
+  // Modal states
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [showLogoutLoading, setShowLogoutLoading] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertData, setAlertData] = useState({})
+
+  // Function to scroll to top and navigate
+  const navigateWithScrollTop = (path) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    navigate(path)
+  }
 
   const stats = [
     { label: 'Poin', value: user?.points || 0, icon: Trophy, color: 'text-yamaha-blue', bg: 'bg-yamaha-blue/10' },
@@ -49,9 +65,56 @@ const Profile = () => {
   ]
 
   const handleLogout = () => {
-    if (confirm('Apakah kamu yakin ingin keluar?')) {
+    setShowLogoutConfirm(true)
+  }
+
+  const handleLogoutConfirm = async () => {
+    setShowLogoutLoading(true)
+    
+    // Simulate loading delay
+    setTimeout(() => {
       logout()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       navigate('/')
+    }, 1500)
+  }
+
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirm(false)
+    setShowLogoutLoading(false)
+  }
+
+  // Referral code util
+  const referralCode = user?.referralCode || (user?.id ? `YW-${String(user.id).slice(-6).toUpperCase()}` : 'YW-NEWUSR')
+
+  const handleCopyReferral = async () => {
+    try {
+      await navigator.clipboard.writeText(referralCode)
+      setAlertData({
+        title: 'Berhasil!',
+        message: 'Kode referral berhasil disalin ke clipboard.',
+        type: 'success'
+      })
+      setShowAlert(true)
+    } catch (e) {
+      setAlertData({
+        title: 'Gagal!',
+        message: 'Gagal menyalin kode referral. Silakan coba lagi.',
+        type: 'error'
+      })
+      setShowAlert(true)
+    }
+  }
+
+  const handleShareReferral = async () => {
+    const shareText = `Gabung Yamaha Warior pakai kode ${referralCode} dan raih bonus poin!`
+    const shareUrl = `${window.location.origin}/login?ref=${referralCode}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Yamaha Warior', text: shareText, url: shareUrl })
+      } catch (_) {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`)
     }
   }
 
@@ -63,11 +126,28 @@ const Profile = () => {
           text: 'Gabung dengan aku di Yamaha Warior dan raih hadiah menarik!',
           url: window.location.origin,
         })
+        setAlertData({
+          title: 'Berhasil!',
+          message: 'Aplikasi berhasil dibagikan.',
+          type: 'success'
+        })
+        setShowAlert(true)
       } catch (err) {
         console.log('Error sharing:', err)
+        setAlertData({
+          title: 'Gagal!',
+          message: 'Gagal membagikan aplikasi. Silakan coba lagi.',
+          type: 'error'
+        })
+        setShowAlert(true)
       }
     } else {
-      alert('Fitur berbagi tidak tersedia di perangkat ini')
+      setAlertData({
+        title: 'Tidak Tersedia',
+        message: 'Fitur berbagi tidak tersedia di perangkat ini.',
+        type: 'warning'
+      })
+      setShowAlert(true)
     }
   }
 
@@ -160,6 +240,88 @@ const Profile = () => {
           </div>
         </motion.div>
 
+        {/* Referral Program */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-white p-6 mb-6 shadow-sm clip-corner border-l-4 border-red-500"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-r from-yamaha-blue to-red-500 rounded-full flex items-center justify-center">
+              <Gift size={20} className="text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg text-yamaha-dark">Program Referral</h2>
+              <p className="text-sm text-gray-600">Ajak teman gabung dan dapatkan bonus poin</p>
+            </div>
+          </div>
+
+          {/* Referral Code */}
+          <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Kode Referral Anda</p>
+                <p className="text-lg font-black text-yamaha-dark tracking-wider">{referralCode}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleCopyReferral}
+                  className="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-sm font-semibold flex items-center gap-2 rounded-lg transition-colors"
+                >
+                  <Copy size={16} /> 
+                </button>
+                    <button 
+                      onClick={handleShareReferral}
+                      className="px-3 py-2 bg-gradient-to-r from-yamaha-blue to-red-500 hover:from-blue-600 hover:to-red-600 text-white text-sm font-semibold flex items-center gap-2 rounded-lg transition-colors"
+                    >
+                      <Share2 size={16} />
+                    </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Referral Statistics */}
+          <div className="bg-gradient-to-r from-blue-50 to-red-50 p-4 rounded-lg mb-4">
+            <h3 className="text-sm font-bold text-gray-700 mb-3">📊 Hasil Referral Anda</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-2xl font-black text-yamaha-blue mb-1">3</p>
+                <p className="text-xs text-gray-600 font-semibold">Teman Bergabung</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-black text-red-500 mb-1">300</p>
+                <p className="text-xs text-gray-600 font-semibold">Poin Bonus</p>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-blue-200">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Progress ke bonus berikutnya:</span>
+                <span className="text-yamaha-blue font-bold">3/5 teman</span>
+              </div>
+              <div className="mt-2 h-2 bg-blue-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-yamaha-blue to-red-500 rounded-full" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Benefits */}
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-xs font-bold text-yamaha-blue mb-1">+100 pts</p>
+              <p className="text-xs text-gray-600">untuk kamu</p>
+            </div>
+            <div className="bg-red-50 p-3 rounded-lg">
+              <p className="text-xs font-bold text-red-500 mb-1">+50 pts</p>
+              <p className="text-xs text-gray-600">untuk teman</p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-red-50 p-3 rounded-lg">
+              <p className="text-xs font-bold text-yamaha-blue mb-1">Bonus</p>
+              <p className="text-xs text-gray-600">tiap 5 orang</p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Menu Items */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -170,7 +332,7 @@ const Profile = () => {
           {menuItems.map((item, index) => (
             <button
               key={index}
-              onClick={() => (item.action === 'share' ? handleShare() : navigate(item.path))}
+              onClick={() => (item.action === 'share' ? handleShare() : navigateWithScrollTop(item.path))}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
             >
               <div className="flex items-center gap-3">
@@ -202,10 +364,33 @@ const Profile = () => {
         >
           <LogOut size={20} />
           Keluar
-        </motion.button>
-      </div>
-    </div>
-  )
-}
+         </motion.button>
+       </div>
 
-export default Profile
+       {/* Logout Confirmation Modal */}
+       <ConfirmModal
+         show={showLogoutConfirm}
+         onClose={handleLogoutCancel}
+         onConfirm={handleLogoutConfirm}
+         title="Konfirmasi Keluar"
+         message="Apakah Anda yakin ingin keluar dari akun Yamaha Warior? Anda akan diarahkan ke halaman utama."
+         confirmText="Ya, Keluar"
+         cancelText="Batal"
+         isLoading={showLogoutLoading}
+         type="warning"
+       />
+
+       {/* Alert Modal */}
+       <AlertModal
+         show={showAlert}
+         onClose={() => setShowAlert(false)}
+         title={alertData.title}
+         message={alertData.message}
+         type={alertData.type}
+         buttonText="OK"
+       />
+     </div>
+   )
+ }
+ 
+ export default Profile

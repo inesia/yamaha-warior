@@ -1,6 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
-import ChatWidget from '../components/ChatWidget'
 
 const AppLayout = () => {
   const location = useLocation()
@@ -27,8 +26,7 @@ const AppLayout = () => {
       {/* Bottom Navigation - Conditional */}
       {!hideBottomNav && <BottomNav />}
       
-      {/* Chat Widget - Show on all pages except chat page */}
-      {!location.pathname.startsWith('/chat') && <ChatWidget />}
+      {/* Chat Widget removed for authenticated layout */}
     </div>
   )
 }

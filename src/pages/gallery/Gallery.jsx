@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import Header from '../../components/Header'
+import AlertModal from '../../components/AlertModal'
 import { 
   Camera, 
   Upload, 
@@ -23,6 +24,10 @@ import {
 const Gallery = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  
+  // Modal states
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertData, setAlertData] = useState({})
 
   // Mock data untuk foto-foto user
   const userPhotos = [
@@ -124,7 +129,12 @@ const Gallery = () => {
         console.log('Error sharing:', err)
       }
     } else {
-      alert('Fitur berbagi tidak tersedia di perangkat ini')
+      setAlertData({
+        title: 'Tidak Tersedia',
+        message: 'Fitur berbagi tidak tersedia di perangkat ini.',
+        type: 'warning'
+      })
+      setShowAlert(true)
     }
   }
 
@@ -335,6 +345,16 @@ const Gallery = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+        title={alertData.title}
+        message={alertData.message}
+        type={alertData.type}
+        buttonText="OK"
+      />
     </div>
   )
 }

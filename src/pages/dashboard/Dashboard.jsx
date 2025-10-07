@@ -1,11 +1,17 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { Trophy, TrendingUp, Award, ChevronRight, Target, Upload, Users, Zap, Star, Clock, Bell, Sun, CloudSun, Sunset, Moon, Heart, Flame, AlertCircle } from 'lucide-react'
+import AlertModal from '../../components/AlertModal'
+import { Trophy, TrendingUp, Award, ChevronRight, Target, Upload, Users, Zap, Star, Clock, Bell, Sun, CloudSun, Sunset, Moon, Heart, Flame, AlertCircle, Gift, Megaphone, Share2, Copy, X } from 'lucide-react'
 
 const Dashboard = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  
+  // Modal states
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertData, setAlertData] = useState({})
   
   // Get time-based greeting
   const getGreeting = () => {
@@ -17,6 +23,79 @@ const Dashboard = () => {
   }
   
   const greeting = getGreeting()
+
+  // Referral code util
+  const referralCode = user?.referralCode || (user?.id ? `YW-${String(user.id).slice(-6).toUpperCase()}` : 'YW-NEWUSR')
+
+  const handleCopyReferral = async () => {
+    try {
+      await navigator.clipboard.writeText(referralCode)
+      setAlertData({
+        title: 'Berhasil!',
+        message: 'Kode referral berhasil disalin ke clipboard.',
+        type: 'success'
+      })
+      setShowAlert(true)
+    } catch (e) {
+      setAlertData({
+        title: 'Gagal!',
+        message: 'Gagal menyalin kode referral. Silakan coba lagi.',
+        type: 'error'
+      })
+      setShowAlert(true)
+    }
+  }
+
+  const handleShareReferral = async () => {
+    const shareText = `Gabung Yamaha Warior pakai kode ${referralCode} dan raih bonus poin!`
+    const shareUrl = `${window.location.origin}/login?ref=${referralCode}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Yamaha Warior', text: shareText, url: shareUrl })
+      } catch (_) {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`)
+    }
+  }
+
+  const announcements = [
+    {
+      id: 'a1',
+      title: 'Event Khusus Weekend!',
+      content: 'Dapatkan 2x poin untuk semua challenge. Berakhir dalam 2 hari!',
+      tag: 'Event',
+      color: 'bg-red-500'
+    },
+    {
+      id: 'a2',
+      title: 'Event Ride & Meet 2025',
+      content: 'Daftar sekarang, slot terbatas untuk komunitas Yamaha!',
+      tag: 'Event',
+      color: 'bg-green-500'
+    },
+    {
+      id: 'a3',
+      title: 'Maintenance Terjadwal',
+      content: 'Aplikasi akan maintenance Minggu 02:00-03:00 WIB.',
+      tag: 'Maintenance',
+      color: 'bg-amber-500'
+    }
+  ]
+
+  // Top announcement banner (dismissible)
+  const latestAnnouncementId = announcements[0]?.id
+  const DISMISS_KEY = 'dismissedAnnouncementId_v2'
+  const [showTopAnnouncement, setShowTopAnnouncement] = useState(true)
+
+  // Untuk demo, selalu tampilkan badge
+  useEffect(() => {
+    setShowTopAnnouncement(true)
+  }, [])
+
+  const dismissTopAnnouncement = () => {
+    // Sementara untuk demo, tidak simpan ke localStorage agar selalu muncul saat refresh
+    setShowTopAnnouncement(false)
+  }
 
   const stats = [
     { 
@@ -132,6 +211,25 @@ const Dashboard = () => {
             </button>
           </motion.div>
 
+          {/* Announcement Badge under date */}
+          {showTopAnnouncement && announcements[0] && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4"
+            >
+              <div className="relative w-full flex items-center gap-2 bg-red-600/80 backdrop-blur-sm text-white px-3 py-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500">{announcements[0].tag}</span>
+                <span className="text-xs font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[220px]">
+                  {announcements[0].title}
+                </span>
+                <button onClick={dismissTopAnnouncement} className="p-1 text-white/90 hover:text-white absolute -top-2 -right-2 bg-red-600">
+                  <X size={12} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Welcome Message with Avatar */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -216,7 +314,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="max-w-lg mx-auto px-6 -mt-16 pb-6">
-        {/* Rank Progress Card */}
+        {/* Rank Progress Card - Moved to top for awareness */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -314,6 +412,52 @@ const Dashboard = () => {
             </button>
           </div>
         </motion.div>
+
+        {/* Referral Program */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="bg-white p-5 shadow-lg shadow-gray-200/50 mb-6 border-l-4 border-red-500 relative overflow-hidden"
+        >
+          {/* Background Pattern */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-red-100"></div>
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-r from-yamaha-blue to-red-500 text-white flex items-center justify-center">
+                  <Gift size={18} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-yamaha-dark">Program Referral</h3>
+                  <p className="text-xs text-gray-600">Ajak teman gabung dan dapatkan bonus poin</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Referral Code Row */}
+            <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 p-3">
+              <div className="text-sm font-black tracking-wider text-yamaha-dark">{referralCode}</div>
+              <div className="ml-auto flex items-center gap-2">
+                <button onClick={handleCopyReferral} className="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-xs font-semibold flex items-center gap-2">
+                  <Copy size={14} /> 
+                </button>
+                <button onClick={handleShareReferral} className="px-3 py-2 bg-gradient-to-r from-yamaha-blue to-red-500 hover:from-blue-600 hover:to-red-600 text-white text-xs font-semibold flex items-center gap-2">
+                  <Share2 size={14} /> 
+                </button>
+              </div>
+            </div>
+
+            {/* Perks */}
+            <div className="grid grid-cols-3 gap-2 mt-3 text-[11px] text-gray-600">
+              <div className="bg-blue-50 px-2 py-1">+100 pts untuk kamu</div>
+              <div className="bg-red-50 px-2 py-1">+50 pts untuk temanmu</div>
+              <div className="bg-gradient-to-r from-blue-50 to-red-50 px-2 py-1">Bonus ekstra tiap 5 orang</div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Announcements section removed - using top badge only */}
 
         {/* Active Challenges */}
         <motion.div
@@ -438,6 +582,16 @@ const Dashboard = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+        title={alertData.title}
+        message={alertData.message}
+        type={alertData.type}
+        buttonText="OK"
+      />
     </div>
   )
 }

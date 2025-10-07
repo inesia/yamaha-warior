@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import useAdminStore from './store/adminStore'
 
@@ -13,6 +13,10 @@ import PublicMembers from './pages/public/Members'
 import PublicChallenges from './pages/public/Challenges'
 import PublicLeaderboard from './pages/public/Leaderboard'
 import Login from './pages/auth/Login'
+import Register from './pages/auth/Register'
+import CompleteProfile from './pages/auth/CompleteProfile'
+import TermsConditions from './pages/legal/TermsConditions'
+import PrivacyPolicy from './pages/legal/PrivacyPolicy'
 
 // Protected Pages
 import Dashboard from './pages/dashboard/Dashboard'
@@ -27,6 +31,7 @@ import Settings from './pages/settings/Settings'
 import Rewards from './pages/rewards/Rewards'
 import Gallery from './pages/gallery/Gallery'
 import LiveChat from './pages/chat/LiveChat'
+import GoogleOneTapDemo from './pages/demo/GoogleOneTapDemo'
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -48,7 +53,19 @@ const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/" replace />
+  }
+  
+  return children
+}
+
+// Profile Completion Gate (redirect to /complete-profile if profile not completed)
+const ProfileGate = ({ children }) => {
+  const user = useAuthStore((state) => state.user)
+  const location = useLocation()
+  
+  if (user && user.profileCompleted === false && location.pathname !== '/complete-profile') {
+    return <Navigate to="/complete-profile" replace />
   }
   
   return children
@@ -104,11 +121,25 @@ function App() {
           <Login />
         </PublicRoute>
       } />
+      <Route path="/register" element={
+        <PublicRoute>
+          <Register />
+        </PublicRoute>
+      } />
+      <Route path="/complete-profile" element={
+        <ProtectedRoute>
+          <CompleteProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/terms-conditions" element={<TermsConditions />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
       {/* Protected Routes with Bottom Navigation */}
       <Route element={
         <ProtectedRoute>
-          <AppLayout />
+          <ProfileGate>
+            <AppLayout />
+          </ProfileGate>
         </ProtectedRoute>
       }>
         <Route path="/dashboard" element={<Dashboard />} />
@@ -123,6 +154,7 @@ function App() {
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/chat" element={<LiveChat />} />
+        <Route path="/demo/google-onetap" element={<GoogleOneTapDemo />} />
       </Route>
 
       {/* Admin Routes */}

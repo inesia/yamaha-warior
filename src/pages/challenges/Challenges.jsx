@@ -152,7 +152,7 @@ const AuthenticatedChallenges = () => {
                 <img
                   src={challenge.image}
                   alt={challenge.title}
-                  className="w-full h-full object-cover mix-blend-overlay"
+                  className="w-full h-full object-cover "
                 />
                 <div className="absolute top-3 left-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(challenge.difficulty)}`}>

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
-import { User, Mail, Bike, Phone, ArrowRight, Check, X } from 'lucide-react'
+import { User, Mail, Bike, Phone, ArrowRight, Check, X, Gift } from 'lucide-react'
 
 const CompleteProfile = () => {
   const navigate = useNavigate()
@@ -12,6 +12,7 @@ const CompleteProfile = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: '',
+    referralCode: '', // Added referral code field
     motorcycles: [], // Changed to array for multiple selection
     agreeTerms: false,
     agreePrivacy: false,
@@ -25,6 +26,7 @@ const CompleteProfile = () => {
   // Refs for form fields
   const nameRef = useRef(null)
   const phoneRef = useRef(null)
+  const referralCodeRef = useRef(null)
   const motorcyclesRef = useRef(null)
   const agreeTermsRef = useRef(null)
   const agreePrivacyRef = useRef(null)
@@ -111,10 +113,11 @@ const CompleteProfile = () => {
 
   // Function to scroll to first error field
   const scrollToFirstError = (errorFields) => {
-    const fieldOrder = ['name', 'phone', 'motorcycles', 'agreeTerms', 'agreePrivacy']
+    const fieldOrder = ['name', 'phone', 'referralCode', 'motorcycles', 'agreeTerms', 'agreePrivacy']
     const refs = {
       name: nameRef,
       phone: phoneRef,
+      referralCode: referralCodeRef,
       motorcycles: motorcyclesRef,
       agreeTerms: agreeTermsRef,
       agreePrivacy: agreePrivacyRef
@@ -212,6 +215,7 @@ const CompleteProfile = () => {
         ...user,
         name: formData.name,
         phone: formData.phone,
+        referralCode: formData.referralCode, // Added referral code
         motorcycles: selectedMotorcycles, // Array of motorcycle objects
         primaryMotorcycle: selectedMotorcycles[0]?.value || '', // First motorcycle as primary
         primaryMotorcycleName: selectedMotorcycles[0]?.label || 'Unknown',
@@ -331,6 +335,27 @@ const CompleteProfile = () => {
                   />
                 </div>
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              </div>
+
+              {/* Referral Code */}
+              <div ref={referralCodeRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kode Referral <span className="text-gray-500">(Opsional)</span>
+                </label>
+                <div className="relative">
+                  <Gift className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    name="referralCode"
+                    value={formData.referralCode}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan kode referral (jika ada)"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                <p className="text-gray-500 text-xs mt-1">
+                  Dapatkan bonus poin jika mendaftar dengan kode referral yang valid
+                </p>
               </div>
 
               {/* Motorcycle Selection */}
